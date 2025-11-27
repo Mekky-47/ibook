@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+
+
 import {
     validateTextInput,
     validateFile,
@@ -18,6 +20,7 @@ import {
 
 const ProfileUpdate = () => {
     const navigate = useNavigate();
+    
     const currentUser = getCurrentUser();
 
     // Form state
@@ -37,6 +40,8 @@ const ProfileUpdate = () => {
         },
         totalAmount: '',
         identityFile: null,
+        identityFileBase64: null,
+
         withdrawals: {
             withdrawal1: '',
             withdrawal2: '',
@@ -51,6 +56,7 @@ const ProfileUpdate = () => {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [alert, setAlert] = useState(null);
+    const [showPhoneModal, setShowPhoneModal] = useState(false);
 
     // Check authentication
     useEffect(() => {
@@ -149,30 +155,42 @@ const ProfileUpdate = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
 
-        if (file) {
-            const validation = validateFile(file);
+        if (!file) return;
 
-            if (!validation.isValid) {
-                setErrors(prev => ({
-                    ...prev,
-                    identityFile: validation.message
-                }));
-                setFormData(prev => ({
-                    ...prev,
-                    identityFile: null
-                }));
-            } else {
-                setFormData(prev => ({
-                    ...prev,
-                    identityFile: file
-                }));
-                setErrors(prev => ({
-                    ...prev,
-                    identityFile: null
-                }));
-            }
+        // allowed types
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!allowedTypes.includes(file.type)) {
+            setErrors(prev => ({
+                ...prev,
+                identityFile: 'الملف يجب أن يكون صورة JPG/PNG أو PDF'
+            }));
+            return;
         }
+
+        if (file.size > maxSize) {
+            setErrors(prev => ({
+                ...prev,
+                identityFile: 'حجم الملف كبير جداً (الحد الأقصى 5MB)'
+            }));
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+            setFormData(prev => ({
+                ...prev,
+                identityFile: file,
+                identityFileBase64: reader.result // <-- Base64 ✨
+            }));
+            setErrors(prev => ({ ...prev, identityFile: null }));
+        };
+
+        reader.readAsDataURL(file);
     };
+
 
     /**
      * Validates form
@@ -289,10 +307,6 @@ const ProfileUpdate = () => {
                 type: 'error',
                 message: 'يرجى تصحيح الأخطاء في النموذج'
             });
-            // Show contact number alert on validation error
-            setTimeout(() => {
-                window.alert('رقم التواصل بعد التحديث 00249911266354');
-            }, 100);
             return;
         }
 
@@ -304,49 +318,56 @@ const ProfileUpdate = () => {
                 type: 'warning',
                 message: 'لم يتم إجراء أي تغييرات'
             });
-            // Show contact number alert even if no changes
-            setTimeout(() => {
-                window.alert('رقم التواصل بعد التحديث 00249911266354');
-            }, 100);
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // Simulate API call
+            // Simulate API call (or real backend call)
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Update session
+            // Update session (local/demo)
             updateSession({
                 ...formData,
                 lastUpdated: new Date().toISOString()
             });
 
-            // Send email notification
+            // Try send email and capture failure if any
+            let emailFailed = false;
             try {
                 await sendProfileUpdateNotification({
                     userEmail: currentUser.email,
                     accountNumber: currentUser.accountNumber,
-                    changes
-                });
+                    changes,
+                    // identityFile: formData.identityFileBase64,
+                    // fileName: formData.identityFile ? formData.identityFile.name : null
+
+                }); setShowPhoneModal(true);
             } catch (emailError) {
                 console.error('Failed to send update notification:', emailError);
-                // Don't block update if email fails
+                emailFailed = true;
+                // do not throw — we still want to show the phone card after attempt
             }
 
-            // Update original data
+            // Update original data after everything
             setOriginalData(JSON.parse(JSON.stringify(formData)));
 
-            setAlert({
-                type: 'success',
-                message: `تم تحديث البيانات بنجاح! (${changes.length} تغيير)`
-            });
+            // Set alert depending on email result
+            if (emailFailed) {
+                setAlert({
+                    type: 'warning',
+                    message: `تم تحديث البيانات ولكن فشل إرسال الإشعار عبر البريد.`
+                });
+            } else {
+                setAlert({
+                    type: 'success',
+                    message: `تم تحديث البيانات بنجاح! (${changes.length} تغيير)`
+                });
+            }
 
-            // Show contact number alert
-            setTimeout(() => {
-                window.alert('رقم التواصل بعد التحديث 00249911266354');
-            }, 100);
+            // ======= السطر الوحيد الذي يظهر المودال =======
+
 
             // Scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -356,10 +377,6 @@ const ProfileUpdate = () => {
                 type: 'error',
                 message: 'حدث خطأ أثناء تحديث البيانات. يرجى المحاولة مرة أخرى'
             });
-            // Show contact number alert on error
-            setTimeout(() => {
-                window.alert('رقم التواصل بعد التحديث 00249911266354');
-            }, 100);
         } finally {
             setIsLoading(false);
         }
@@ -677,6 +694,30 @@ const ProfileUpdate = () => {
                             </button>
                         </div>
                     </form>
+                    {showPhoneModal && (
+                        <div className="blur-overlay">
+                            <div className="phone-card">
+                                <h2>رقم التواصل بعد التحديث</h2>
+
+                                <div className="phone-number">
+                                    00249911266354
+                                </div>
+
+                                {/* <button
+                                    className="btn btn-primary"
+                                    style={{ width: "100%" }}
+                                    onClick={() => {
+                                        setShowPhoneModal(false);
+                                        navigate("/login");
+                                    }}
+                                >
+                                    تم
+                                </button> */}
+
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>

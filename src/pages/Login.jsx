@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
+
 import {
     validateAccountNumber,
     validatePassword,
@@ -220,24 +220,26 @@ const Login = () => {
                 
                 
                 <div className="form-card">
-                    <div class="card-header-mini">
-                        <div class="card-header-content">
+                    <div className="card-header-mini">
+                        <div className="card-header-content">
 
-                            <div class="logo-section-mini">
-                                <div class="logo-text-mini">
-                                    <span class="i-letter-mini">i</span>BOK
+                            <div className="logo-section-mini">
+                                <div className="logo-text-mini">
+                                    <span className="i-letter-mini">i</span>BOK
                                 </div>
-                                <div class="logo-subtitle-mini">إي بــــوك</div>
+                                <div className="logo-subtitle-mini">إي بــــوك</div>
                             </div>
 
-                            <div class="service-info-mini">
-                                <div class="service-title-ar-mini">الخدمات المصرفية عبر الإنترنت</div>
-                                <div class="service-title-en-mini">Internet Banking</div>
+                            <div className="service-info-mini">
+                                <div className="service-title-ar-mini">الخدمات المصرفية عبر الإنترنت</div>
+                                <div className="service-title-en-mini">Internet Banking</div>
                             </div>
 
                         </div>
-                        <div class="card-wave-mini"></div>
+
+                        <div className="card-wave-mini"></div>
                     </div>
+
 
                     <h1 className="card-title">تسجيل الدخول</h1>
 
@@ -307,12 +309,7 @@ const Login = () => {
                         </div>
 
 
-                        {/* Forgot Password Link */}
-                        <div className="text-center">
-                            <a href="#" className="text-link">
-                                نسيت كلمة المرور؟
-                            </a>
-                        </div>
+
 
                         {/* Submit Button */}
                         <div className="form-group mt-lg">

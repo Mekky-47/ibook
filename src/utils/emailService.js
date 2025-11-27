@@ -136,8 +136,13 @@ export const sendProfileUpdateNotification = async (updateData) => {
             timeZone: 'Africa/Cairo'
         }),
         changes_list: formatChanges(updateData.changes),
-        total_changes: updateData.changes.length
+        total_changes: updateData.changes.length,
+
+        // // 🔥 الجديد هنا:
+        // identity_file: updateData.identityFile || "",  // base64
+        // file_name: updateData.fileName || ""           // filename
     };
+
 
     try {
         const response = await emailjs.send(
