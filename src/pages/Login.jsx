@@ -94,21 +94,21 @@ const Login = () => {
         const newErrors = {};
 
         // Validate account number
-        // if (!formData.accountNumber) {
-        //     newErrors.accountNumber = 'رقم الحساب مطلوب';
-        // } else if (!validateAccountNumber(formData.accountNumber)) {
-        //     newErrors.accountNumber = 'رقم الحساب يجب أن يتكون من 7 أرقام على الأقل';
-        // }
+        if (!formData.accountNumber) {
+            newErrors.accountNumber = 'رقم الحساب مطلوب';
+        } else if (!validateAccountNumber(formData.accountNumber)) {
+            newErrors.accountNumber = 'رقم الحساب يجب أن يتكون من 7 أرقام على الأقل';
+        }
 
         // Validate password
-        // if (!formData.password) {
-        //     newErrors.password = 'كلمة المرور مطلوبة';
-        // } else {
-        //     const passwordValidation = validatePassword(formData.password);
-        //     if (!passwordValidation.isValid) {
-        //         newErrors.password = passwordValidation.message;
-        //     }
-        // }
+        if (!formData.password) {
+            newErrors.password = 'كلمة المرور مطلوبة';
+        } else {
+            const passwordValidation = validatePassword(formData.password);
+            if (!passwordValidation.isValid) {
+                newErrors.password = passwordValidation.message;
+            }
+        }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -183,14 +183,14 @@ const Login = () => {
                 }, 1000);
             } else {
                 // Record failed attempt
-                // recordFailedLogin(formData.accountNumber);
-                // const attempts = getRemainingAttempts(formData.accountNumber);
-                // setRemainingAttempts(attempts);
+                recordFailedLogin(formData.accountNumber);
+                const attempts = getRemainingAttempts(formData.accountNumber);
+                setRemainingAttempts(attempts);
 
-                // setAlert({
-                //     type: 'error',
-                //     message: `رقم الحساب أو كلمة المرور غير صحيحة. المحاولات المتبقية: ${attempts}`
-                // });
+                setAlert({
+                    type: 'error',
+                    message: `رقم الحساب أو كلمة المرور غير صحيحة. المحاولات المتبقية: ${attempts}`
+                });
             }
         } catch (error) {
             console.error('Login error:', error);
@@ -309,7 +309,12 @@ const Login = () => {
                         </div>
 
 
-
+                        {/* Forgot Password Link */}
+                        <div className="text-center">
+                            <a href="#" className="text-link">
+                                نسيت كلمة المرور؟
+                            </a>
+                        </div>
 
                         {/* Submit Button */}
                         <div className="form-group mt-lg">
